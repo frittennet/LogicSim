@@ -16,33 +16,33 @@ Simulation::Simulation(int numGrids, int numNodes) {
 	tickIndex = 0;
 	tickInterval = 1000;
 	isPaused = true;
-	stopThread = false; 
+	stopThread = false;
 	currentInputNumberIndex = 0;
 	numInputNumbers = 0;
-	this->numGrids = numGrids; 
-	this->numNodes = numNodes; 
+	this->numGrids = numGrids;
+	this->numNodes = numNodes;
 
-	grids = new Grid*[numGrids]; 
-	nodes = new Node*[numNodes]; 
-	
-} 
+	grids = new Grid*[numGrids];
+	nodes = new Node*[numNodes];
+
+}
 
 Simulation::~Simulation() {
-	mutex.lock(); 
+	mutex.lock();
 	if (simulationThread.joinable()) {
 		simulationThread.join();
 	}
-	mutex.unlock(); 
+	mutex.unlock();
 	for (int i = 0; i < numNodes; i++) {
-		delete nodes[i]; 
+		delete nodes[i];
 	}
-	
+
 	for (int i = 0; i < numGrids; i++) {
 		delete grids[i];
 	}
 
-	delete[] nodes; 
-	delete[] grids; 
+	delete[] nodes;
+	delete[] grids;
 
 	std::vector<APISimulationState*>::iterator it2 = states.begin();
 	while (it2 != states.end()) {
@@ -54,121 +54,127 @@ Simulation::~Simulation() {
 
 APISimulationState * Simulation::getState(int tick)
 {
-	mutex.lock(); 
-	APISimulationState* state = states.size() > 0 ? states[tick] : nullptr;
-	mutex.unlock(); 
-	return state; 
+	while (states.size() <= tick) {
+		Sleep(1);
+	}
+	APISimulationState* state = states.size() > tick ? states[tick] : nullptr;
+	return state;
 }
 
 void Simulation::addGrid(Grid * grid)
 {
-	grids[grid->id] = grid; 
+	grids[grid->id] = grid;
 }
 
 void Simulation::addNumber(Number * number)
 {
-	numberList.insert(std::pair<int, Number*>(number->id, number)); 
+	numberList.insert(std::pair<int, Number*>(number->id, number));
 }
 
 void Simulation::removeNumber(Number * number)
 {
-	numberList.erase(number->id); 
-	delete number; 
+	numberList.erase(number->id);
+	delete number;
 }
 
 void Simulation::addNode(Node* node) {
-	nodes[node->id] = node; 
+	nodes[node->id] = node;
 	if (node->type == NodeType::GAMEINPUT) {
-		rootInputNode = (NodeGameInput*)node; 
+		rootInputNode = (NodeGameInput*)node;
 	}
 	if (node->type == NodeType::GAMEOUTPUT) {
-		rootOutputNode = (NodeGameOutput*)node; 
+		rootOutputNode = (NodeGameOutput*)node;
 	}
 }
 
 void Simulation::start()
 {
-	debugPrint("Starting Simulation \n"); 
-	mutex.lock(); 
-	isPaused = false; 
+	debugPrint("Starting Simulation \n");
+	mutex.lock();
+	isPaused = false;
 	simulationThread = std::thread(&Simulation::threadEntryPoint, this);
 	// simulationThread.detach(); 
-	mutex.unlock(); 
+	mutex.unlock();
 }
 
 void Simulation::pause()
 {
 	mutex.lock();
-	isPaused = true; 
+	isPaused = true;
 	mutex.unlock();
 }
 
-void Simulation::reset() {
+void Simulation::stop()
+{
 	if (simulationThread.joinable()) {
-		debugPrint("Joining Threads \n"); 
-		stopThread = true; 
+		debugPrint("Joining Threads \n");
+		stopThread = true;
 		simulationThread.join();
-		stopThread = false; 
+		stopThread = false;
 	}
 	tickIndex = 0;
 	isPaused = true;
 	currentInputNumberIndex = 0;
 	outputs.clear();
-	int iteration = 0; 
+	int iteration = 0;
 	std::unordered_map<int, Number*>::iterator it2 = numberList.begin();
 	while (it2 != numberList.end()) {
-		Number* number = it2->second; 
+		Number* number = it2->second;
 		number->grid->removeNumber(number);
-		delete number; 
-		it2++; 
+		delete number;
+		it2++;
 	}
-	numberList.clear(); 
-}
-
-void Simulation::stop()
-{
-	reset(); 
+	numberList.clear();
 }
 
 void Simulation::setInputNumbers(int * numbers, int numNumbers)
 {
-	reset(); 
-	inputNumbers = numbers; 
-	numInputNumbers = numNumbers; 
-	currentInputNumberIndex = 0; 
+	inputNumbers = numbers;
+	numInputNumbers = numNumbers;
+	currentInputNumberIndex = 0;
 }
 
 int* Simulation::getOutputNumbers()
 {
 	if (outputs.size() > 0) {
-		return outputs.data(); 
+		return outputs.data();
 	}
-	return nullptr; 
+	return nullptr;
 }
 
 void Simulation::setTickInterval(int tickInterval)
 {
-	mutex.lock(); 
-	this->tickInterval = tickInterval; 
-	mutex.unlock(); 
+	this->tickInterval = tickInterval;
 }
 
 void Simulation::threadEntryPoint()
 {
 	while (!stopThread) {
-		mutex.lock(); 
 		if (!isPaused) {
-			debugPrint("Tick \n"); 
-			tick(); 
+			mutex.lock();
+			debugPrint("Tick \n");
+			tick();
+			mutex.unlock();
 		}
-		mutex.unlock(); 
-		Sleep(tickInterval); 
+		Sleep(tickInterval);
 	}
+}
+
+void Simulation::spawnNumber(APINumber apiNumber) {
+	Grid* grid = grids[apiNumber.gridId];
+	Number* newInputNumber = new Number(grid);
+	newInputNumber->value = apiNumber.value;
+	newInputNumber->position = apiNumber.position;
+	newInputNumber->direction = apiNumber.direction;
+	Vector2Int forward = apiNumber.position + Vector2Int::fromDirection(apiNumber.direction);
+	this->addNumber(newInputNumber);
+	newInputNumber->currentAction = new NumberActionSpawnMove(newInputNumber, apiNumber.position, forward);
+	newInputNumber->grid->setNumber(newInputNumber);
 }
 
 void Simulation::tick()
 {
-	Vector2Int forward = rootInputNode->position + Vector2Int::fromDirection(rootInputNode->direction); 
+	Vector2Int forward = rootInputNode->position + Vector2Int::fromDirection(rootInputNode->direction);
 	if (rootGrid->getNumberAtPosition(&rootInputNode->position) == nullptr) {
 		if (currentInputNumberIndex < numInputNumbers) {
 			Number* newInputNumber = new Number(rootGrid);
@@ -176,22 +182,28 @@ void Simulation::tick()
 			newInputNumber->position = rootInputNode->position;
 			newInputNumber->direction = rootInputNode->direction;
 			Vector2Int forward = rootInputNode->position + Vector2Int::fromDirection(rootInputNode->direction);
-			numberList.insert(std::pair<int, Number*>(newInputNumber->id, newInputNumber));
-			rootGrid->setNumber(newInputNumber);
-			newInputNumber->currentAction = new NumberActionSpawnMove(newInputNumber, rootInputNode->position, forward); 
+			this->addNumber(newInputNumber);
+			newInputNumber->currentAction = new NumberActionSpawnMove(newInputNumber, rootInputNode->position, forward);
+			newInputNumber->grid->setNumber(newInputNumber);
 
-			currentInputNumberIndex++;; 
+			currentInputNumberIndex++;;
 		}
 	}
 
 	std::unordered_map<int, Number*>::iterator it = numberList.begin();
 	while (it != numberList.end()) {
 		Number* number = it->second;
-		number->tick();
-		it++; 
+		if (number->deleteNextTick) {
+			it = this->numberList.erase(it);
+			delete number;
+		}
+		else {
+			number->tick();
+			it++;
+		}
 	}
 
-	std::vector<APINumber> apiNumbers; 
+	std::vector<APINumber> apiNumbers;
 	std::unordered_map<int, Number*>::iterator it2 = numberList.begin();
 	while (it2 != numberList.end()) {
 		Number* number = it2->second;
@@ -203,21 +215,21 @@ void Simulation::tick()
 				apiNumbers.push_back(apiNumber);
 			}
 		}
-		it2++; 
+		it2++;
 	}
 
-	APISimulationState* currentState; 
-	if (apiNumbers.size() > 0) { 
-		APINumber* numbers = new APINumber[apiNumbers.size()]; 
-		std::copy(apiNumbers.begin(), apiNumbers.end(), numbers); 
+	APISimulationState* currentState;
+	if (apiNumbers.size() > 0) {
+		APINumber* numbers = new APINumber[apiNumbers.size()];
+		std::copy(apiNumbers.begin(), apiNumbers.end(), numbers);
 		currentState = new APISimulationState(numbers, currentInputNumberIndex);
 	}
 	else {
 		currentState = new APISimulationState(nullptr, currentInputNumberIndex);
 	}
 
-	this->states.push_back(currentState); 
+	this->states.push_back(currentState);
 
-	debugPrint("Added State \n"); 
-	tickIndex++; 
+	debugPrint("Added State %i \n", this->states.size());
+	tickIndex++;
 }

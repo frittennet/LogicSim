@@ -144,6 +144,9 @@
     <ClCompile Include="NumberAction.cpp" />
     <ClCompile Include="Vector2Int.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="TODO.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

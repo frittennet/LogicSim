@@ -16,6 +16,7 @@ public:
 	Direction direction; 
 	Vector2Int position; 
 	Grid* grid; 
+	bool deleteNextTick; 
 	int value; 
 	int id; 
 

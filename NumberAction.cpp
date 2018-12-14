@@ -8,6 +8,7 @@
 #include "NumberAction.h"
 #include "Grid.h"
 #include "LogicSim.h" 
+#include "Simulation.h"
 
 NumberAction::NumberAction(Number* number)
 {
@@ -37,19 +38,21 @@ NumberActionMove::NumberActionMove(Number* number, Vector2Int from, Vector2Int t
 	this->to = to; 
 }
 
-bool NumberActionMove::execute(Number* caller)
+bool NumberActionMove::execute(Number* caller) 
 {
 	Number* blockingNumber = this->number->grid->getNumberAtPosition(&to);
-	bool blocked = blockingNumber != nullptr && blockingNumber != this->number; 
+	bool blocked = blockingNumber != nullptr && blockingNumber != caller && ((blockingNumber->direction + 2) % 4) != number->direction; 
 	if (blocked) {
-		blocked = !blockingNumber->currentAction->execute(caller);
+		if (blockingNumber->currentAction != nullptr) {
+			blocked = !blockingNumber->currentAction->execute(caller);
+		}
 	}
 	if (!blocked) {
 		NumberAction::execute(caller);
 		this->number->grid->removeNumber(this->number);
 		this->number->position = this->number->position + Vector2Int::forDirection[this->number->direction];
 		this->number->grid->setNumber(this->number);
-		debugPrint("Move [%i, %i] => [%i, %i] \n", from.x, from.y, to.x, to.y); 
+		debugPrint("[%i] => Move [%i, %i] => [%i, %i] \n", this->number->id, from.x, from.y, to.x, to.y); 
 		return true; 
 	}
 	
@@ -63,7 +66,9 @@ NumberActionMoveDelete::NumberActionMoveDelete(Number* number, Vector2Int from, 
 
 bool NumberActionMoveDelete::execute(Number* caller)
 {
+	debugPrint("[%i] => Delete [%i, %i] => [%i, %i] \n", this->number->id, from.x, from.y, to.x, to.y);
 	NumberAction::execute(caller);
+	this->number->deleteNextTick = true; 
 	this->number->grid->removeNumber(this->number); 
 	return true; 
 }
@@ -75,6 +80,7 @@ NumberActionSpawnMove::NumberActionSpawnMove(Number* number, Vector2Int from, Ve
 
 bool NumberActionSpawnMove::execute(Number* caller) 
 {
+	debugPrint("[%i] => Spawn [%i, %i] => [%i, %i] \n", this->number->id, from.x, from.y, to.x, to.y);
 	return NumberActionMove::execute(caller); 
 }
 
@@ -86,6 +92,7 @@ NumberActionMergeMinus::NumberActionMergeMinus(Number* number, Number* other) : 
 
 bool NumberActionMergeMinus::execute(Number* caller)
 {
+	debugPrint("[%i] => Merge [%i, %i] => [%i, %i] \n", this->number->id, from.x, from.y, to.x, to.y);
 	other->value = other->value - number->value; 
 	return NumberActionMoveDelete::execute(caller); 
 }

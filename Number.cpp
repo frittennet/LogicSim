@@ -16,6 +16,7 @@ Number::Number(Grid* grid)
 	this->grid = grid; 
 	this->direction = Direction::UP;
 	this->position = Vector2Int::zero;
+	this->deleteNextTick = false; 
 }
 
 Number::~Number()

@@ -23,7 +23,6 @@ private:
 	bool stopThread; 
 	std::vector<APISimulationState*> states; 
 
-	void reset(); 
 	void tick(); 
 	void threadEntryPoint();
 
@@ -52,6 +51,7 @@ public:
 	void addGrid(Grid* grid);
 	void addNode(Node* node); 
 	void addNumber(Number* number); 
+	void spawnNumber(APINumber number); 
 	void removeNumber(Number* number); 
 	void start(); 
 	void pause(); 

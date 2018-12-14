@@ -66,6 +66,15 @@ APISimulation* API::createSimulation(APISimulationDefinition* apiSimulationDefin
 		simulation->addNode(node);
 	}
 
+	debugPrint("Initializing Pre-Defined Grid Numbers ( placed before simulation starts ) \n");
+	for (int i = 0; i < apiSimulationDefinition->numGridNumbers; i++) {
+		APINumber apiNumber = apiSimulationDefinition->gridNumbers[i];
+		debugPrint("Setting up Grid Number %i on %i \n", apiNumber.id, apiNumber.gridId);
+		simulation->spawnNumber(apiNumber);
+	}
+
+	simulation->setInputNumbers(apiSimulationDefinition->inputNumbers, apiSimulationDefinition->numInputNumbers); 
+
 	APISimulation* apiSimulation = new APISimulation(simulation);
 	simulation->apiSimulation = apiSimulation;
 
@@ -111,11 +120,6 @@ void APISimulation::pause()
 void APISimulation::stop()
 {
 	simulation->stop();
-}
-
-void APISimulation::setInputNumbers(int numbers[], int numNumbers)
-{
-	simulation->setInputNumbers(numbers, numNumbers);
 }
 
 void APISimulation::setTickInterval(int tickInterval)

@@ -1,5 +1,5 @@
-- Initial Numbers ( for presets like custom made constant value smaller-than nodes ) into API::createSimulation(); 
 - paginated LZ compression for states ( bacause the program uses about 1GB of ram every 10 seconds without it ) 
 - Unit Tests ??? 
 - Implement all Nodes 
 - Create proper deltas in APISimulationState ( to further compress amount of memory needed ) 
+- Pre-Define Outputs and run simulation up to n ticks return result this is a secondary mode to test the solution in a rigerous manner 

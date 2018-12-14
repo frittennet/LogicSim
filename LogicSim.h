@@ -42,25 +42,6 @@ public:
 
 };
 
-class DllExport APISimulationDefinition
-{
-public:
-	APIGrid* grids;
-	APINode* nodes;
-	int numGrids;
-	int numNodes;
-
-	APISimulationDefinition(APIGrid grids[], APINode nodes[], int numGrids, int numNodes) {
-		this->grids = grids; 
-		this->nodes = nodes; 
-		this->numGrids = numGrids; 
-		this->numNodes = numNodes; 
-	}
-
-	~APISimulationDefinition(); 
-
-};
-
 enum DllExport APINumberAction {
 	ACTION_NONE, ACTION_MOVE, ACTION_DELETE, ACTION_SPAWN, ACTION_MERGE
 };
@@ -73,17 +54,45 @@ public:
 	Vector2Int position;
 	Direction direction;
 	int value;
-	APINumberAction lastAction; 
+	APINumberAction lastAction;
 
-	APINumber() { }; 
+	APINumber() { };
 	APINumber(int id, int gridId, Vector2Int position, Direction direction, int value, APINumberAction lastAction) {
-		this->id = id; 
-		this->gridId = gridId; 
-		this->position = position; 
-		this->direction = direction; 
-		this->value = value; 
-		this->lastAction = lastAction; 
+		this->id = id;
+		this->gridId = gridId;
+		this->position = position;
+		this->direction = direction;
+		this->value = value;
+		this->lastAction = lastAction;
 	}
+
+};
+
+class DllExport APISimulationDefinition
+{
+public:
+	APIGrid* grids;
+	APINode* nodes;
+	APINumber* gridNumbers; 
+	int* inputNumbers; 
+
+	int numGrids;
+	int numNodes;
+	int numGridNumbers; 
+	int numInputNumbers; 
+
+	APISimulationDefinition(APIGrid grids[], int numGrids, APINode nodes[], int numNodes, APINumber gridNumbers[], int numGridNumbers, int inputNumbers[], int numInputNumbers) {
+		this->grids = grids; 
+		this->numGrids = numGrids; 
+		this->nodes = nodes; 
+		this->numNodes = numNodes; 
+		this->gridNumbers = gridNumbers; 
+		this->numGridNumbers = numGridNumbers; 
+		this->inputNumbers = inputNumbers; 
+		this->numInputNumbers = numInputNumbers; 
+	}
+
+	~APISimulationDefinition(); 
 
 };
 
@@ -111,10 +120,9 @@ public:
 
 	int getTickIndex();
 	APISimulationState* getState(int tick);
-	void start();
-	void pause();
-	void stop();
-	void setInputNumbers(int numbers[], int numNumbers); 
+	void start(); 
+	void pause(); 
+	void stop(); 
 	void setTickInterval(int tickInterval); 
 	int getTickInterval(int tickInterval); 
 };

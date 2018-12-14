@@ -24,18 +24,29 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 
 void test() {
 	APIGrid grids[] = { APIGrid(0), APIGrid(1) };
-	APINode nodes[] = { APINode(0, Vector2Int(0, 0), Direction::RIGHT, NodeType::GAMEINPUT, 0, 0) , APINode(1, Vector2Int(90, 10), Direction::RIGHT, NodeType::GAMEOUTPUT, 0, 0) };
+	APINode nodes[] = { 
+		APINode(0, Vector2Int(10, 10), Direction::RIGHT, NodeType::GAMEINPUT, 0, 0), 
+		APINode(1, Vector2Int(90, 10), Direction::RIGHT, NodeType::GAMEOUTPUT, 0, 0), 
+		APINode(2, Vector2Int(50, 10), Direction::RIGHT, NodeType::SMALLERTHAN, 0, 0), 
+		APINode(3, Vector2Int(60, 10), Direction::RIGHT, NodeType::CUSTOM, 0, 1), 
+		APINode(4, Vector2Int(90, 10), Direction::RIGHT, NodeType::OUTPUT, 1, 3), 
+		APINode(5, Vector2Int(10, 10), Direction::RIGHT, NodeType::NODE_INPUT, 1, 0),
+		APINode(6, Vector2Int(10, 16), Direction::RIGHT, NodeType::NODE_INPUT, 1, 0) 
+	};
+	
+	APINumber gridNumbers[] = { 
+		APINumber(0, 0, Vector2Int(0, 0), Direction::RIGHT, 0, APINumberAction::ACTION_SPAWN), 
+		APINumber(1, 0, Vector2Int(1, 0), Direction::DOWN, 0, APINumberAction::ACTION_SPAWN), 
+		APINumber(2, 0, Vector2Int(1, 1), Direction::LEFT, 0, APINumberAction::ACTION_SPAWN),
+		APINumber(3, 0, Vector2Int(0, 1), Direction::UP, 0, APINumberAction::ACTION_SPAWN)
+	}; 
+	
+	int inputNumbers[] = { -1, 0, 1 }; 
 
-	APISimulationDefinition d = APISimulationDefinition(grids, nodes, 2, 2);
+	APISimulationDefinition d = APISimulationDefinition(grids, 2, nodes, 7, gridNumbers, 4, inputNumbers, 3);
 
 	APISimulation* s = API::createSimulation(&d);
 
-	int numbers[10];
-	for (int i = 0; i < 10; i++) {
-		numbers[i] = i;
-	}
-
-	s->setInputNumbers(numbers, 100);
 	s->start();
 	s->setTickInterval(0);
 
@@ -44,13 +55,15 @@ void test() {
 	while (true) {
 		debugPrint("Main Thread Test \n");
 		Sleep(1000);
-		printf("Ticks Per Second : %i \n", (s->getTickIndex() - lastTickIndex));; 
-		lastTickIndex = s->getTickIndex(); 
-		APISimulationState* state = s->getState(s->getTickIndex()); 
-		if (state != nullptr) {
-			printf("Number [%i] positoin => [%i, %i] \n", state->numbers[0].id, state->numbers[0].position.x, state->numbers[0].position.y); 
+		int index = s->getTickIndex(); 
+		printf("Ticks Per Second : %i \n", (index - lastTickIndex));;
+		lastTickIndex = index;
+		APISimulationState* state = s->getState(index); 
+		debugPrint("Getting State for tick : %i \n", index); 
+		if (state != nullptr && state->numbers != nullptr) {
+			printf("Number [%i] position => [%i, %i] \n", state->numbers[0].id, state->numbers[0].position.x, state->numbers[0].position.y); 
 		}
-		if (n == 60000) {
+		if (n == 60) {
 			API::destroySimulation(s);
 			break;
 		}

@@ -5,6 +5,7 @@
 #include "Direction.h"
 #include "NumberAction.h"
 #include "Grid.h"
+#include "Simulation.h" 
 #include "Node.h"
 
 Node::Node(NodeType type, Grid * grid)
@@ -35,7 +36,7 @@ NumberAction* NodeMinus::getAction(Number * number)
 		return new NumberActionMergeMinus(number, numberUp); 
 	}
 
-	return nullptr; 
+	return new NumberActionMoveDelete(number, number->position, this->position); 
 }
 
 NodeCustom::NodeCustom(Grid * grid, Grid * subGrid) : Node::Node(NodeType::CUSTOM, grid)
@@ -50,7 +51,35 @@ NodeCustom::~NodeCustom()
 
 NumberAction * NodeCustom::getAction(Number * number)
 {
-	return nullptr;
+	bool canExecute = true; 
+	std::vector<Node*> nodesInDirection = this->subGrid->inputNodes[number->direction]; 
+	for (std::vector<Node*>::iterator it = nodesInDirection.begin(); it != nodesInDirection.end(); ++it) {
+		NodeInput* inputNode = (NodeInput*)(*it); 
+		Vector2Int forward = inputNode->position + Vector2Int::fromDirection(inputNode->direction); 
+		if (inputNode->grid->getNumberAtPosition(&forward) != nullptr) {
+			canExecute = false; 
+		}
+	}
+
+	if (canExecute) {
+		for (std::vector<Node*>::iterator it = nodesInDirection.begin(); it != nodesInDirection.end(); ++it) {
+			NodeInput* inputNode = (NodeInput*)(*it);
+			Vector2Int forward = inputNode->position + Vector2Int::fromDirection(inputNode->direction);
+			canExecute = true;
+			Number* subNumber = new Number(this->subGrid);
+			subNumber->position = forward;
+			subNumber->direction = inputNode->direction;
+			subNumber->currentAction = new NumberActionSpawnMove(subNumber, subNumber->position, forward);
+			subNumber->grid = inputNode->grid;
+			subNumber->value = number->value;
+			subNumber->grid->setNumber(subNumber); 
+			subNumber->grid->sim->addNumber(subNumber); 
+		}
+
+		return new NumberActionMoveDelete(number, number->position, this->position); 
+	}
+	
+	return nullptr; 
 }
 
 NodeSmallerThan::NodeSmallerThan(Grid * grid) : Node::Node(NodeType::SMALLERTHAN, grid)
@@ -60,7 +89,18 @@ NodeSmallerThan::NodeSmallerThan(Grid * grid) : Node::Node(NodeType::SMALLERTHAN
 
 NumberAction * NodeSmallerThan::getAction(Number * number)
 {
-	return nullptr;
+	if (number->position == this->position) { // on top ( move out ) 
+		return new NumberActionMove(number, number->position, this->position+Vector2Int::fromDirection(number->direction)); 
+	}
+	else { // before enter ( delete if >= 0 else move into  ) 
+		if (number->value < 0) {
+			return new NumberActionMove(number, number->position, this->position);
+		}
+		else {
+			return new NumberActionMoveDelete(number, number->position, this->position);
+		}
+	}
+	
 }
 
 NodeInput::NodeInput(Grid * grid) : Node::Node(NodeType::NODE_INPUT, grid)
@@ -70,7 +110,7 @@ NodeInput::NodeInput(Grid * grid) : Node::Node(NodeType::NODE_INPUT, grid)
 
 NumberAction * NodeInput::getAction(Number * number)
 {
-	return nullptr;
+	return new NumberActionMoveDelete(number, number->position, this->position); 
 }
 
 NodeOutput::NodeOutput(Grid * grid, NodeCustom * outputNode) : Node::Node(NodeType::OUTPUT, grid)
@@ -80,17 +120,32 @@ NodeOutput::NodeOutput(Grid * grid, NodeCustom * outputNode) : Node::Node(NodeTy
 
 NumberAction * NodeOutput::getAction(Number * number)
 {
-	return nullptr;
+	Vector2Int forward = this->parentNode->position + Vector2Int::fromDirection(number->direction);
+	if (this->parentNode->grid->getNumberAtPosition(&forward) == nullptr) {
+		Number* outputNumber = new Number(this->parentNode->grid);
+		outputNumber->position = forward;
+		outputNumber->direction = number->direction;
+		outputNumber->currentAction = new NumberActionSpawnMove(outputNumber, outputNumber->position, forward);
+		outputNumber->grid = this->parentNode->grid;
+		outputNumber->value = number->value;
+		outputNumber->grid->setNumber(outputNumber);
+		outputNumber->grid->sim->addNumber(outputNumber);
+
+		return new NumberActionMoveDelete(number, number->position, this->position);
+	}
+	else {
+		return nullptr; 
+	}
 }
 
 NodeGameInput::NodeGameInput(Grid * grid) : Node::Node(NodeType::GAMEINPUT, grid)
 {
-
+	
 }
 
 NumberAction * NodeGameInput::getAction(Number * number)
 {
-	return nullptr;
+	return new NumberActionMoveDelete(number, number->position, this->position);
 }
 
 NodeGameOutput::NodeGameOutput(Grid * grid) : Node::Node(NodeType::GAMEOUTPUT, grid)
@@ -100,5 +155,6 @@ NodeGameOutput::NodeGameOutput(Grid * grid) : Node::Node(NodeType::GAMEOUTPUT, g
 
 NumberAction * NodeGameOutput::getAction(Number * number)
 {
-	return nullptr;
+	number->grid->sim->outputs.push_back(number->value); 
+	return new NumberActionMoveDelete(number, number->position, this->position);
 }

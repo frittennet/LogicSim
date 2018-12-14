@@ -2,11 +2,11 @@
 
 #include <stdio.h> 
 
+#include "common.h" 
 #include "Grid.h" 
 #include "LogicSim.h" 
 #include "Simulation.h"
 #include "NumberAction.h" 
-
 #include "Direction.h" 
 #include "Vector2Int.h" 
 
@@ -14,9 +14,6 @@
 #define _CRTDBG_MAP_ALLOC  
 #include <stdlib.h>  
 #include <crtdbg.h>  
-
-
-
 
 BOOL APIENTRY DllMain(HANDLE hModule,
 	DWORD  ul_reason_for_call,
@@ -33,8 +30,8 @@ void test() {
 
 	APISimulation* s = API::createSimulation(&d);
 
-	int numbers[100];
-	for (int i = 0; i < 100; i++) {
+	int numbers[10];
+	for (int i = 0; i < 10; i++) {
 		numbers[i] = i;
 	}
 
@@ -43,10 +40,17 @@ void test() {
 	s->setTickInterval(0);
 
 	int n = 0;
+	int lastTickIndex = 0; 
 	while (true) {
-		printf("Main Thread Test \n");
-		Sleep(1);
-		if (n == 1000) {
+		debugPrint("Main Thread Test \n");
+		Sleep(1000);
+		printf("Ticks Per Second : %i \n", (s->getTickIndex() - lastTickIndex));; 
+		lastTickIndex = s->getTickIndex(); 
+		APISimulationState* state = s->getState(s->getTickIndex()); 
+		if (state != nullptr) {
+			printf("Number [%i] positoin => [%i, %i] \n", state->numbers[0].id, state->numbers[0].position.x, state->numbers[0].position.y); 
+		}
+		if (n == 60000) {
 			API::destroySimulation(s);
 			break;
 		}

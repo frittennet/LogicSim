@@ -104,14 +104,12 @@ public:
 class DllExport APISimulation
 {
 private:
-	Simulation* simulation;
-	std::vector<APISimulationState*> states;
+	Simulation* simulation; 
 public:
 	APISimulation(Simulation* simulation);
 	~APISimulation();
 
 	int getTickIndex();
-	void addState(APISimulationState* state); 
 	APISimulationState* getState(int tick);
 	void start();
 	void pause();

@@ -1,18 +1,20 @@
 #include <thread> 
 
+#include "common.h" 
+
 #include "LogicSim.h"
 #include "Simulation.h"
 
 APISimulation* API::createSimulation(APISimulationDefinition* apiSimulationDefinition)
 {
-	printf("Initializing \n"); 
+	debugPrint("Initializing \n"); 
 	Simulation* simulation = new Simulation(apiSimulationDefinition->numGrids, apiSimulationDefinition->numNodes);
-	printf("Grids : %i , Nodes : %i \n", apiSimulationDefinition->numGrids, apiSimulationDefinition->numNodes);
+	debugPrint("Grids : %i , Nodes : %i \n", apiSimulationDefinition->numGrids, apiSimulationDefinition->numNodes);
 
-	printf("Initializing Grid Objects \n"); 
+	debugPrint("Initializing Grid Objects \n"); 
 	for(int i=0;i<apiSimulationDefinition->numGrids;i++) { 
 		APIGrid apiGrid = apiSimulationDefinition->grids[i];
-		printf("Grid %i \n", apiGrid.id);
+		debugPrint("Grid %i \n", apiGrid.id);
 		Grid* grid = new Grid(simulation);
 		grid->id = apiGrid.id;
 		if (apiGrid.id == 0) {
@@ -21,11 +23,11 @@ APISimulation* API::createSimulation(APISimulationDefinition* apiSimulationDefin
 		simulation->addGrid(grid); 
 	}
 	
-	printf("Initializing Nodes \n"); 
+	debugPrint("Initializing Nodes \n"); 
 	for (int i = 0; i < apiSimulationDefinition->numNodes; i++) {
 		APINode apiNode = apiSimulationDefinition->nodes[i];
 		Grid* grid = simulation->grids[apiNode.gridId];
-		printf("Node %i Node->grid->id %i \n", apiNode.id, grid->id);
+		debugPrint("Node %i Node->grid->id %i \n", apiNode.id, grid->id);
 		Grid* subGrid;
 		Node* ref;
 		Node* node = nullptr;
@@ -83,11 +85,6 @@ APISimulation::APISimulation(Simulation* simulation)
 APISimulation::~APISimulation()
 {
 	simulation->stop();
-	std::vector<APISimulationState*>::iterator it2 = states.begin();
-	while (it2 != states.end()) {
-		delete *it2; 
-		it2++; 
-	}
 	delete simulation;
 }
 
@@ -96,14 +93,9 @@ int APISimulation::getTickIndex()
 	return simulation->tickIndex;
 }
 
-void APISimulation::addState(APISimulationState * state)
-{
-	this->states.push_back(state); 
-}
-
 APISimulationState* APISimulation::getState(int tick)
 {
-	return states[tick];
+	return simulation->getState(tick); 
 }
 
 void APISimulation::start()

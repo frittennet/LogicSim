@@ -48,6 +48,9 @@
     <ClInclude Include="LogicSim.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="common.h">
+      <Filter>Headerdateien\Misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Simulation.cpp">

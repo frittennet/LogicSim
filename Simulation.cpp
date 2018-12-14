@@ -4,6 +4,8 @@
 #include <unordered_map> 
 #include <vector> 
 
+#include "common.h" 
+
 #include "Number.h"
 #include "Node.h" 
 #include "NumberAction.h"
@@ -42,8 +44,20 @@ Simulation::~Simulation() {
 	delete[] nodes; 
 	delete[] grids; 
 
-	
+	std::vector<APISimulationState*>::iterator it2 = states.begin();
+	while (it2 != states.end()) {
+		delete *it2;
+		it2++;
+	}
 
+}
+
+APISimulationState * Simulation::getState(int tick)
+{
+	mutex.lock(); 
+	APISimulationState* state = states.size() > 0 ? states[tick] : nullptr;
+	mutex.unlock(); 
+	return state; 
 }
 
 void Simulation::addGrid(Grid * grid)
@@ -74,7 +88,7 @@ void Simulation::addNode(Node* node) {
 
 void Simulation::start()
 {
-	printf("Starting Simulation \n"); 
+	debugPrint("Starting Simulation \n"); 
 	mutex.lock(); 
 	isPaused = false; 
 	simulationThread = std::thread(&Simulation::threadEntryPoint, this);
@@ -91,7 +105,7 @@ void Simulation::pause()
 
 void Simulation::reset() {
 	if (simulationThread.joinable()) {
-		printf("Joining Threads \n"); 
+		debugPrint("Joining Threads \n"); 
 		stopThread = true; 
 		simulationThread.join();
 		stopThread = false; 
@@ -144,7 +158,7 @@ void Simulation::threadEntryPoint()
 	while (!stopThread) {
 		mutex.lock(); 
 		if (!isPaused) {
-			printf("Tick \n"); 
+			debugPrint("Tick \n"); 
 			tick(); 
 		}
 		mutex.unlock(); 
@@ -155,7 +169,7 @@ void Simulation::threadEntryPoint()
 void Simulation::tick()
 {
 	Vector2Int forward = rootInputNode->position + Vector2Int::fromDirection(rootInputNode->direction); 
-	if (rootGrid->getNumberAtPosition(&rootInputNode->position) == nullptr && rootGrid->getNumberAtPosition(&forward) == nullptr) {
+	if (rootGrid->getNumberAtPosition(&rootInputNode->position) == nullptr) {
 		if (currentInputNumberIndex < numInputNumbers) {
 			Number* newInputNumber = new Number(rootGrid);
 			newInputNumber->value = inputNumbers[currentInputNumberIndex];
@@ -184,7 +198,7 @@ void Simulation::tick()
 		if (number->currentAction != nullptr) {
 			bool executed = number->currentAction->execute(number);
 			if (executed) {
-				printf("Number %i -> %i \n", number->id, number->currentAction->type);
+				debugPrint("Number %i -> %i \n", number->id, number->currentAction->type);
 				APINumber apiNumber = APINumber(number->id, number->grid->id, number->position, number->direction, number->value, number->currentAction->type);
 				apiNumbers.push_back(apiNumber);
 			}
@@ -202,6 +216,8 @@ void Simulation::tick()
 		currentState = new APISimulationState(nullptr, currentInputNumberIndex);
 	}
 
-	
-	apiSimulation->addState(currentState); 
+	this->states.push_back(currentState); 
+
+	debugPrint("Added State \n"); 
+	tickIndex++; 
 }

@@ -1,3 +1,9 @@
+
+
+
+
+#include "common.h" 
+
 #include "Number.h" 
 #include "NumberAction.h"
 #include "Grid.h"
@@ -5,7 +11,7 @@
 
 NumberAction::NumberAction(Number* number)
 {
-	printf("NumberAction Constructor \n"); 
+	debugPrint("NumberAction Constructor \n"); 
 
 	type = APINumberAction::ACTION_NONE; 
 	this->number = number; 
@@ -14,7 +20,7 @@ NumberAction::NumberAction(Number* number)
 
 NumberAction::~NumberAction()
 {
-	printf("NumberAction Deconstructor \n"); 
+	debugPrint("NumberAction Deconstructor \n"); 
 
 }
 
@@ -33,7 +39,6 @@ NumberActionMove::NumberActionMove(Number* number, Vector2Int from, Vector2Int t
 
 bool NumberActionMove::execute(Number* caller)
 {
-	NumberAction::execute(caller);
 	Number* blockingNumber = this->number->grid->getNumberAtPosition(&to);
 	bool blocked = blockingNumber != nullptr && blockingNumber != this->number; 
 	if (blocked) {
@@ -44,7 +49,7 @@ bool NumberActionMove::execute(Number* caller)
 		this->number->grid->removeNumber(this->number);
 		this->number->position = this->number->position + Vector2Int::forDirection[this->number->direction];
 		this->number->grid->setNumber(this->number);
-		printf("Move [%i, %i] => [%i, %i] \n", from.x, from.y, to.x, to.y); 
+		debugPrint("Move [%i, %i] => [%i, %i] \n", from.x, from.y, to.x, to.y); 
 		return true; 
 	}
 	
@@ -73,29 +78,7 @@ bool NumberActionSpawnMove::execute(Number* caller)
 	return NumberActionMove::execute(caller); 
 }
 
-NumberActionComposite::NumberActionComposite(Number* number, NumberAction* actions, int num_actions) : NumberAction::NumberAction(number) 
-{
-	this->actions = actions; 
-	this->num_actions = num_actions; 
-}
-
-NumberActionComposite::~NumberActionComposite()
-{
-	delete[] this->actions; 
-}
-
-bool NumberActionComposite::execute(Number* caller) 
-{
-	NumberAction::execute(caller); 
-	for (int i = 0; i < this->num_actions; i++) {
-		if (!this->actions[i].execute(caller)) {
-			return false;
-		}
-	}
-	return true;
-}
-
-NumberActionMergeMinus::NumberActionMergeMinus(Number * number, Number * other) : NumberActionMoveDelete::NumberActionMoveDelete(number, number->position, other->position)
+NumberActionMergeMinus::NumberActionMergeMinus(Number* number, Number* other) : NumberActionMoveDelete::NumberActionMoveDelete(number, number->position, other->position)
 {
 	APINumberAction::ACTION_MERGE; 
 	this->other = other; 

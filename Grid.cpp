@@ -1,5 +1,7 @@
 #include <algorithm> 
 
+#include "common.h" 
+
 #include "NodeType.h" 
 #include "Grid.h"
 #include "Node.h" 
@@ -41,7 +43,7 @@ void Grid::setNode(Node* node)
 		nodeAtPosition.insert(std::pair<int64_t, Node*>(getMapIndex(&node->position), node));
 	}
 	else {
-		printf("Tried to insert number over existing. [%i] \n", id);
+		debugPrint("Tried to insert number over existing. [%i] \n", id);
 	}
 }
 
@@ -73,7 +75,7 @@ void Grid::setNumber(Number* number)
 		numberAtPosition.insert(std::pair<int64_t, Number*>(getMapIndex(&number->position), number));
 	}
 	else {
-		printf("Tried to insert number over existing. [%i] \n", id);
+		debugPrint("Tried to insert number over existing. [%i] \n", id);
 	}
 }
 

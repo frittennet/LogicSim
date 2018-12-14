@@ -1,5 +1,7 @@
 #include <iostream> 
 
+#include "common.h" 
+
 #include "NumberAction.h"
 #include "Number.h"
 #include "Vector2Int.h"
@@ -11,7 +13,6 @@ int Number::nextId = 0;
 Number::Number(Grid* grid) 
 {
 	id = nextId++; 
-	printf("Number Constructor \n"); 
 	this->grid = grid; 
 	this->direction = Direction::UP;
 	this->position = Vector2Int::zero;
@@ -19,7 +20,6 @@ Number::Number(Grid* grid)
 
 Number::~Number()
 {
-	printf("Number Desconstructor \n"); 
 	delete lastAction; 
 	delete currentAction; 
 	
@@ -27,7 +27,7 @@ Number::~Number()
 
 void Number::tick()
 {
-	printf("Number Tick \n"); 
+	debugPrint("Number Tick \n"); 
 
 	if (currentAction != nullptr && currentAction->wasExecuted) {
 		delete lastAction; 

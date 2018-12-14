@@ -15,7 +15,7 @@ public:
 	NumberAction(Number* number);
 	~NumberAction(); 
 
-	virtual bool execute(Number* caller);
+	virtual bool execute(Number* caller); 
 };
 
 class NumberActionMove : public NumberAction {
@@ -43,17 +43,6 @@ public:
 	bool execute(Number* caller);
 
 }; 
-
-class NumberActionComposite : public NumberAction {
-public: 
-	NumberAction* actions; 
-	int num_actions; 
-
-	NumberActionComposite(Number* number, NumberAction* actions, int num_actions); 
-	~NumberActionComposite(); 
-
-	bool execute(Number* caller);
-};
 
 class NumberActionSpawnMove : public NumberActionMove {
 public:

@@ -1,3 +1,6 @@
+
+#include "common.h" 
+
 #include "Vector2Int.h" 
 #include "Direction.h"
 #include "NumberAction.h"
@@ -32,7 +35,7 @@ NumberAction* NodeMinus::getAction(Number * number)
 		return new NumberActionMergeMinus(number, numberUp); 
 	}
 
-	return NULL; 
+	return nullptr; 
 }
 
 NodeCustom::NodeCustom(Grid * grid, Grid * subGrid) : Node::Node(NodeType::CUSTOM, grid)

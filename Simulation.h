@@ -10,6 +10,7 @@
 #include <unordered_map> 
 
 class APISimulation; 
+class APISimulationState;
 
 using namespace std;
 
@@ -20,6 +21,7 @@ private:
 	std::mutex mutex; 
 	std::thread simulationThread; 
 	bool stopThread; 
+	std::vector<APISimulationState*> states; 
 
 	void reset(); 
 	void tick(); 
@@ -31,7 +33,7 @@ public:
 	int tickInterval; 
 	int numGrids; 
 	int numNodes; 
-
+	
 	Simulation(int numGrids, int numNodes);
 	~Simulation();
 
@@ -46,6 +48,7 @@ public:
 	int currentInputNumberIndex; 
 	std::vector<int> outputs; 
 	
+	APISimulationState* getState(int tick); 
 	void addGrid(Grid* grid);
 	void addNode(Node* node); 
 	void addNumber(Number* number); 

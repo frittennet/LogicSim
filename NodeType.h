@@ -1,0 +1,5 @@
+#pragma once
+
+enum NodeType {
+	NODE_INPUT, OUTPUT, CUSTOM, GAMEINPUT, GAMEOUTPUT, MINUS, SMALLERTHAN
+};

@@ -37,6 +37,7 @@ public:
 	MemoryPool<Number, 4096> numberPool; 
 	MemoryPool<Grid, 4096> gridPool;
 	MemoryPool<Node, 4096> nodePool; 
+	MemoryPool<APISimulationState, 4096> statePool; 
 
 	Simulation(int numGrids, int numNodes);
 	~Simulation();

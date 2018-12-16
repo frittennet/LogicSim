@@ -41,7 +41,7 @@ Simulation::~Simulation() {
 	
 	std::vector<APISimulationState*>::iterator it2 = states.begin();
 	while (it2 != states.end()) {
-		delete *it2;
+		statePool.deleteElement(*it2); 
 		it2++;
 	}
 	
@@ -230,10 +230,10 @@ void Simulation::tick()
 	if (apiNumbers.size() > 0) {
 		APINumber* numbers = new APINumber[apiNumbers.size()];
 		std::copy(apiNumbers.begin(), apiNumbers.end(), numbers);
-		currentState = new APISimulationState(numbers, currentInputNumberIndex);
+		currentState = statePool.newElement(numbers, currentInputNumberIndex); 
 	}
 	else {
-		currentState = new APISimulationState(nullptr, currentInputNumberIndex);
+		currentState = statePool.newElement(nullptr, currentInputNumberIndex); 
 	}
 
 	this->states.push_back(currentState);

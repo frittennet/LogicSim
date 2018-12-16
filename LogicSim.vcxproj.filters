@@ -51,6 +51,9 @@
     <ClInclude Include="common.h">
       <Filter>Headerdateien\Misc</Filter>
     </ClInclude>
+    <ClInclude Include="MemoryPool.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Simulation.cpp">
@@ -75,6 +78,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="LogicSim.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryPool.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

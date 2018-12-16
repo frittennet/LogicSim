@@ -8,6 +8,8 @@ class NumberAction;
 class Number;
 class Grid;
 
+class NodeCustom; 
+
 class Node
 {
 public:
@@ -16,11 +18,16 @@ public:
 	Grid* grid;
 	NodeType type;
 
+	// subclass data ( for alignment in mem pool ) 
+	Grid* subGrid;
+	NodeCustom* parentNode; 
+
 	int id;
 
+	Node() { }; 
 	Node(NodeType type, Grid* grid);
 
-	virtual NumberAction* getAction(Number* number) = 0;
+	virtual NumberAction* getAction(Number* number);
 
 };
 
@@ -51,7 +58,6 @@ public:
 class NodeCustom : public Node
 {
 public:
-	Grid* subGrid;
 
 	NodeCustom(Grid* grid, Grid* subGrid);
 	~NodeCustom();
@@ -62,7 +68,6 @@ public:
 class NodeOutput : public Node
 {
 public:
-	NodeCustom* parentNode; 
 
 	NodeOutput(Grid* grid, NodeCustom* outputNode);
 

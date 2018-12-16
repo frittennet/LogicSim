@@ -16,11 +16,6 @@ Grid::Grid(Simulation* sim)
 Grid::~Grid()
 {
 	nodeAtPosition.clear(); 
-	std::unordered_map<int64_t, Number*>::iterator it2 = numberAtPosition.begin();
-	while (it2 != numberAtPosition.end()) {
-		delete it2->second;
-		it2 = numberAtPosition.erase(it2++);
-	}
 }
 
 int64_t Grid::getMapIndex(Vector2Int* position) {

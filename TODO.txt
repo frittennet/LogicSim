@@ -1,5 +1,5 @@
 - paginated LZ compression for states ( bacause the program uses about 1GB of ram every 10 seconds without it ) 
 - Unit Tests ??? 
-- Implement all Nodes 
+- Fix Node implementations ... nodes should return their respective NumberActions direcetly so chaining actions becomes possible 
 - Create proper deltas in APISimulationState ( to further compress amount of memory needed ) 
 - Pre-Define Outputs and run simulation up to n ticks return result this is a secondary mode to test the solution in a rigerous manner 

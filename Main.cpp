@@ -41,9 +41,14 @@ void test() {
 		APINumber(3, 0, Vector2Int(0, 1), Direction::UP, 0, APINumberAction::ACTION_SPAWN)
 	}; 
 	
-	int inputNumbers[] = { -1, 0, 1 }; 
+#define NUM_NUMBERS 100
 
-	APISimulationDefinition d = APISimulationDefinition(grids, 2, nodes, 7, gridNumbers, 4, inputNumbers, 3);
+	int inputNumbers[NUM_NUMBERS];
+	for (int i = 0; i < NUM_NUMBERS; i++) {
+		inputNumbers[i] = i-(NUM_NUMBERS/2);
+	}
+
+	APISimulationDefinition d = APISimulationDefinition(grids, 2, nodes, 7, gridNumbers, 4, inputNumbers, NUM_NUMBERS);
 
 	APISimulation* s = API::createSimulation(&d);
 
@@ -63,11 +68,12 @@ void test() {
 		if (state != nullptr && state->numbers != nullptr) {
 			printf("Number [%i] position => [%i, %i] \n", state->numbers[0].id, state->numbers[0].position.x, state->numbers[0].position.y); 
 		}
-		if (n == 60) {
+		n++;
+
+		if (n == 10) {
 			API::destroySimulation(s);
 			break;
 		}
-		n++;
 	}
 }
 

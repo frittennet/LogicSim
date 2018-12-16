@@ -15,11 +15,8 @@ APISimulation* API::createSimulation(APISimulationDefinition* apiSimulationDefin
 	for(int i=0;i<apiSimulationDefinition->numGrids;i++) { 
 		APIGrid apiGrid = apiSimulationDefinition->grids[i];
 		debugPrint("Grid %i \n", apiGrid.id);
-		Grid* grid = new Grid(simulation);
+		Grid* grid = simulation->gridPool.newElement(simulation); 
 		grid->id = apiGrid.id;
-		if (apiGrid.id == 0) {
-			simulation->rootGrid = grid;
-		}
 		simulation->addGrid(grid); 
 	}
 	
@@ -30,30 +27,31 @@ APISimulation* API::createSimulation(APISimulationDefinition* apiSimulationDefin
 		debugPrint("Node %i Node->grid->id %i \n", apiNode.id, grid->id);
 		Grid* subGrid;
 		Node* ref;
-		Node* node = nullptr;
+		Node* nodePtr = simulation->nodePool.allocate(); 
+		Node* node = nullptr; 
 		switch (apiNode.type) {
 		case NodeType::CUSTOM:
 			subGrid = simulation->grids[apiNode.referenceNodeId];
-			node = new NodeCustom(grid, subGrid);
+			node = new (nodePtr) NodeCustom(grid, subGrid);
 			break;
 		case NodeType::GAMEINPUT:
-			node = new NodeGameInput(grid);
+			node = new (nodePtr) NodeGameInput(grid);
 			break;
 		case NodeType::GAMEOUTPUT:
-			node = new NodeGameOutput(grid);
+			node = new (nodePtr) NodeGameOutput(grid);
 			break;
 		case NodeType::MINUS:
-			node = new NodeMinus(grid);
+			node = new (nodePtr) NodeMinus(grid);
 			break;
 		case NodeType::NODE_INPUT:
-			node = new NodeInput(grid);
+			node = new (nodePtr) NodeInput(grid);
 			break;
 		case NodeType::OUTPUT:
 			ref = simulation->nodes[apiNode.referenceNodeId];
-			node = new NodeOutput(grid, (NodeCustom*)ref);
+			node = new (nodePtr) NodeOutput(grid, (NodeCustom*)ref);
 			break;
 		case NodeType::SMALLERTHAN:
-			node = new NodeSmallerThan(grid);
+			node = new (nodePtr) NodeSmallerThan(grid);
 			break;
 		}
 
@@ -62,7 +60,6 @@ APISimulation* API::createSimulation(APISimulationDefinition* apiSimulationDefin
 		node->direction = apiNode.direction; 
 		node->grid = grid; 
 		node->type = apiNode.type; 
-		grid->setNode(node);
 		simulation->addNode(node);
 	}
 

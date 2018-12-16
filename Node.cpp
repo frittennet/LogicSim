@@ -1,6 +1,7 @@
 
 #include "common.h" 
 
+#include "MemoryPool.h"
 #include "Vector2Int.h" 
 #include "Direction.h"
 #include "NumberAction.h"
@@ -14,9 +15,9 @@ Node::Node(NodeType type, Grid * grid)
 	this->grid = grid;
 }
 
-NumberAction * Node::getAction(Number * number)
+NumberAction* Node::getAction(Number * number)
 {
-	return nullptr;
+	return nullptr; 
 }
 
 NodeMinus::NodeMinus(Grid * grid) : Node::Node(NodeType::MINUS, grid)
@@ -66,13 +67,12 @@ NumberAction * NodeCustom::getAction(Number * number)
 			NodeInput* inputNode = (NodeInput*)(*it);
 			Vector2Int forward = inputNode->position + Vector2Int::fromDirection(inputNode->direction);
 			canExecute = true;
-			Number* subNumber = new Number(this->subGrid);
+			Number* subNumber = this->subGrid->sim->numberPool.newElement(this->subGrid);
 			subNumber->position = forward;
 			subNumber->direction = inputNode->direction;
 			subNumber->currentAction = new NumberActionSpawnMove(subNumber, subNumber->position, forward);
 			subNumber->grid = inputNode->grid;
-			subNumber->value = number->value;
-			subNumber->grid->setNumber(subNumber); 
+			subNumber->value = number->value; 
 			subNumber->grid->sim->addNumber(subNumber); 
 		}
 
@@ -122,13 +122,12 @@ NumberAction * NodeOutput::getAction(Number * number)
 {
 	Vector2Int forward = this->parentNode->position + Vector2Int::fromDirection(number->direction);
 	if (this->parentNode->grid->getNumberAtPosition(&forward) == nullptr) {
-		Number* outputNumber = new Number(this->parentNode->grid);
+		Number* outputNumber = this->parentNode->grid->sim->numberPool.newElement(this->parentNode->grid); 
 		outputNumber->position = forward;
 		outputNumber->direction = number->direction;
 		outputNumber->currentAction = new NumberActionSpawnMove(outputNumber, outputNumber->position, forward);
 		outputNumber->grid = this->parentNode->grid;
 		outputNumber->value = number->value;
-		outputNumber->grid->setNumber(outputNumber);
 		outputNumber->grid->sim->addNumber(outputNumber);
 
 		return new NumberActionMoveDelete(number, number->position, this->position);

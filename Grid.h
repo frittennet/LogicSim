@@ -21,6 +21,9 @@ public:
 
 	int id; 
 
+	Grid() {
+
+	}
 	Grid(Simulation* sim);
 	~Grid();
 

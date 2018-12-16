@@ -17,6 +17,8 @@ Number::Number(Grid* grid)
 	this->direction = Direction::UP;
 	this->position = Vector2Int::zero;
 	this->deleteNextTick = false; 
+	this->lastAction = nullptr; 
+	this->currentAction = nullptr; 
 }
 
 Number::~Number()
@@ -33,17 +35,17 @@ void Number::tick()
 	if (currentAction != nullptr && currentAction->wasExecuted) {
 		delete lastAction; 
 		lastAction = currentAction;
-		currentAction = NULL;
+		currentAction = nullptr;
 	}
 	
-	if (currentAction == NULL) {
+	if (currentAction == nullptr) {
 		Vector2Int forward = position + Vector2Int::forDirection[this->direction]; 
 		Node* nodeCurrent = this->grid->getNodeAtPosition(&position);
 		Node* nodeForward = this->grid->getNodeAtPosition(&forward);
-		if (nodeCurrent != NULL) {
+		if (nodeCurrent != nullptr) {
 			currentAction = nodeCurrent->getAction(this);
 		}
-		else if (nodeForward != NULL) {
+		else if (nodeForward != nullptr) {
 			currentAction = nodeForward->getAction(this); 
 		}
 		else {

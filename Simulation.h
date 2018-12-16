@@ -6,6 +6,7 @@
 #include "Vector2Int.h"
 #include "Node.h"
 #include "Grid.h"
+#include "MemoryPool.h" 
 
 #include <unordered_map> 
 
@@ -33,6 +34,10 @@ public:
 	int numGrids; 
 	int numNodes; 
 	
+	MemoryPool<Number, 4096> numberPool; 
+	MemoryPool<Grid, 4096> gridPool;
+	MemoryPool<Node, 4096> nodePool; 
+
 	Simulation(int numGrids, int numNodes);
 	~Simulation();
 
@@ -51,8 +56,8 @@ public:
 	void addGrid(Grid* grid);
 	void addNode(Node* node); 
 	void addNumber(Number* number); 
-	void spawnNumber(APINumber number); 
 	void removeNumber(Number* number); 
+	void spawnNumber(APINumber number); 
 	void start(); 
 	void pause(); 
 	void stop(); 

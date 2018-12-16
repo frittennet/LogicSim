@@ -20,6 +20,7 @@ public:
 	int value; 
 	int id; 
 
+	Number() { }; 
 	Number(Grid* grid);
 	~Number(); 
 

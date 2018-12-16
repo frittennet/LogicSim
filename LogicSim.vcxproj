@@ -127,6 +127,7 @@
     <ClInclude Include="LogicSim.h" />
     <ClInclude Include="Direction.h" />
     <ClInclude Include="Grid.h" />
+    <ClInclude Include="MemoryPool.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="NodeType.h" />
     <ClInclude Include="Number.h" />
@@ -138,6 +139,7 @@
     <ClCompile Include="LogicSim.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MemoryPool.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="Number.cpp" />
     <ClCompile Include="Simulation.cpp" />
